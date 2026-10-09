@@ -727,22 +727,22 @@ namespace libzpaq
     // Mix b[0..128*r-1]. Uses 128*r*n bytes of memory and O(r*n) time
     static void smix(char *b, int r, int n)
     {
-        libzpaq::Array<U32> x(32 * r), v(32 * r * n);
-        for (int i = 0; i < r * 128; ++i)
+        libzpaq::Array<U32> x(size_t(32) * r), v(size_t(32) * r * n);
+        for (int i = 0; i < size_t(r) * 128; ++i)
             x[i / 4] += (b[i] & 255) << i % 4 * 8;
         for (int i = 0; i < n; ++i)
         {
-            memcpy(&v[i * r * 32], &x[0], r * 128);
+            memcpy(&v[size_t(i) * r * 32], &x[0], size_t(r) * 128);
             blockmix(&x[0], r);
         }
         for (int i = 0; i < n; ++i)
         {
             U32 j = x[(2 * r - 1) * 16] & (n - 1);
-            for (int k = 0; k < r * 32; ++k)
-                x[k] ^= v[j * r * 32 + k];
+            for (int k = 0; k < size_t(r) * 32; ++k)
+                x[k] ^= v[size_t(j) * r * 32 + k];
             blockmix(&x[0], r);
         }
-        for (int i = 0; i < r * 128; ++i)
+        for (int i = 0; i < size_t(r) * 128; ++i)
             b[i] = x[i / 4] >> (i % 4 * 8);
     }
 
@@ -755,11 +755,11 @@ namespace libzpaq
     {
         assert(r <= 8);
         assert(n > 0 && (n & (n - 1)) == 0); // power of 2?
-        libzpaq::Array<char> b(p * r * 128);
-        pbkdf2(pw, pwlen, salt, saltlen, 1, &b[0], p * r * 128);
+        libzpaq::Array<char> b(size_t(p) * r * 128);
+        pbkdf2(pw, pwlen, salt, saltlen, 1, &b[0], size_t(p) * r * 128);
         for (int i = 0; i < p; ++i)
-            smix(&b[i * r * 128], r, n);
-        pbkdf2(pw, pwlen, &b[0], p * r * 128, 1, buf, buflen);
+            smix(&b[size_t(i) * r * 128], r, n);
+        pbkdf2(pw, pwlen, &b[0], size_t(p) * r * 128, 1, buf, buflen);
     }
 
     // Stretch key in[0..31], assumed to be SHA256(password), with
